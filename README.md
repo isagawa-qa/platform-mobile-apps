@@ -13,7 +13,9 @@ AI-powered Appium test automation for native and hybrid mobile apps, with a 5-la
 
 ## Status
 
-The released platform runs its reference suite against a real iOS simulator in CI. On the GitHub `macos-15` runner, both `ios-reference.yml` (the reference suite) and `prod-test-l3.yml` (the live L3 batch) execute green against the simulator.
+The released platform runs its reference flow against a real iOS simulator in CI. On the GitHub `macos-15` runner, both `ios-reference.yml` (the reference flow) and `prod-test-l3.yml` (the live L3 batch) execute green against the simulator.
+
+**iOS from Windows, free:** the `ios-tunnel` workflow holds a GitHub-hosted simulator open behind a Cloudflare quick tunnel. On 2026-10-06 the reference flow ran from a Windows host through it and passed (see [`SETUP.md`](SETUP.md#4b1-ios-on-windows)).
 
 Android runs on a **local emulator**: an API 34 AVD driven through Appium with the UiAutomator2 driver, recorded end to end in [`SETUP.md`](SETUP.md#windows-host). There is no Android CI workflow.
 
@@ -141,7 +143,7 @@ What runs where today. `runs today` means an exercised path (a CI run on record,
 | Platform | Device location | macOS host | Windows host |
 |---|---|---|---|
 | iOS | local | supported, unverified | not supported |
-| iOS | remote | needs IOS_DEVICE_APPIUM_URL + IOS_UDID | needs IOS_DEVICE_APPIUM_URL + IOS_UDID |
+| iOS | remote | needs IOS_DEVICE_APPIUM_URL + IOS_UDID | runs today (free `ios-tunnel` workflow, [SETUP 4b.1](SETUP.md#4b1-ios-on-windows)) |
 | iOS | cloud | needs BrowserStack credentials | needs BrowserStack credentials |
 | iOS | ci | runs today | runs today |
 | Android | local | supported, unverified | runs today |
@@ -202,8 +204,8 @@ Details and the verify step: [`SETUP.md#step-6-run-kernelsession-start-then-kern
 ### Tests
 
 ```bash
-pytest -m ios --platform=ios           # iOS reference suite (reachable simulator; what CI runs)
-pytest -m android --platform=android   # Android reference suite (booted emulator/device + Appium)
+PYTHONPATH=tests pytest -p conftest framework/_reference/tests -m ios --platform=ios          # iOS reference flow (what CI runs)
+PYTHONPATH=tests pytest -p conftest framework/_reference/tests -m android --platform=android  # Android reference flow
 
 pytest --collect-only                  # no device yet: confirm the project collects (no session)
 ```
@@ -253,7 +255,7 @@ platform-mobile-apps/
 +-- tests/
 |   +-- conftest.py                  # pytest fixtures (config, device, driver, mobile)
 |   +-- data/                        # test data
-+-- .github/workflows/               # ios-reference, prod-test-l3 (+ ios-tunnel, a manual debug tool)
++-- .github/workflows/               # ios-reference, prod-test-l3, ios-tunnel (free remote iOS from any host)
 +-- apps/                            # app builds (downloaded at run time, gitignored)
 +-- .mcp.json                        # Appium discovery MCP server
 +-- CLAUDE.md                        # kernel instructions
